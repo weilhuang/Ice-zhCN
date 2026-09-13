@@ -22,18 +22,6 @@ final class UpdatesManager: NSObject, ObservableObject {
     /// The shared app state.
     private(set) weak var appState: AppState?
 
-    /// Automatic update checks are disabled for this fork.
-    var automaticallyChecksForUpdates: Bool {
-        get { false }
-        set { objectWillChange.send() }
-    }
-
-    /// Automatic update downloads are disabled for this fork.
-    var automaticallyDownloadsUpdates: Bool {
-        get { false }
-        set { objectWillChange.send() }
-    }
-
     /// GitHub Releases page for this fork.
     static let releasesURL = URL(string: "https://github.com/weilhuang/Ice-zhCN/releases")
 
