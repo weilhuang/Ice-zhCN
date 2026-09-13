@@ -6,12 +6,7 @@
 import SwiftUI
 
 struct AboutSettingsPane: View {
-    @EnvironmentObject var appState: AppState
     @Environment(\.openURL) private var openURL
-
-    private var updatesManager: UpdatesManager {
-        appState.updatesManager
-    }
 
     private var acknowledgementsURL: URL {
         // swiftlint:disable:next force_unwrapping
@@ -20,7 +15,11 @@ struct AboutSettingsPane: View {
 
     private var contributeURL: URL {
         // swiftlint:disable:next force_unwrapping
-        URL(string: "https://github.com/jordanbaird/Ice")!
+        URL(string: "https://github.com/weilhuang/Ice-zhCN")!
+    }
+
+    private var releasesURL: URL {
+        contributeURL.appendingPathComponent("releases")
     }
 
     private var issuesURL: URL {
@@ -30,14 +29,6 @@ struct AboutSettingsPane: View {
     private var donateURL: URL {
         // swiftlint:disable:next force_unwrapping
         URL(string: "https://icemenubar.app/Donate")!
-    }
-
-    private var lastUpdateCheckString: String {
-        if let date = updatesManager.lastUpdateCheckDate {
-            date.formatted(date: .abbreviated, time: .standard)
-        } else {
-            "Never"
-        }
     }
 
     var body: some View {
@@ -97,41 +88,16 @@ struct AboutSettingsPane: View {
     @ViewBuilder
     private var updatesSection: some View {
         IceSection(options: .hasDividers) {
-            automaticallyCheckForUpdates
-            automaticallyDownloadUpdates
-            if updatesManager.canCheckForUpdates {
-                checkForUpdates
+            Text("This Simplified Chinese fork does not auto-update from upstream Ice. Download new builds from this repository’s Releases so an official update cannot overwrite the localization.")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Button("Open GitHub Releases") {
+                openURL(releasesURL)
             }
         }
         .frame(maxWidth: 600)
-    }
-
-    @ViewBuilder
-    private var automaticallyCheckForUpdates: some View {
-        Toggle(
-            "Automatically check for updates",
-            isOn: updatesManager.bindings.automaticallyChecksForUpdates
-        )
-    }
-
-    @ViewBuilder
-    private var automaticallyDownloadUpdates: some View {
-        Toggle(
-            "Automatically download updates",
-            isOn: updatesManager.bindings.automaticallyDownloadsUpdates
-        )
-    }
-
-    @ViewBuilder
-    private var checkForUpdates: some View {
-        HStack {
-            Button("Check for Updates") {
-                updatesManager.checkForUpdates()
-            }
-            Spacer()
-            Text("Last checked: \(lastUpdateCheckString)")
-                .font(.caption)
-        }
     }
 
     @ViewBuilder

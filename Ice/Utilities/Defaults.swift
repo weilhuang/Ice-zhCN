@@ -176,6 +176,10 @@ extension Defaults {
         case iceBarLocation = "IceBarLocation"
         case iceBarPinnedLocation = "IceBarPinnedLocation"
 
+        // MARK: Localization
+
+        case iceAppLanguage = "IceAppLanguage"
+
         // MARK: Migration
 
         case hasMigrated0_8_0 = "hasMigrated0_8_0"

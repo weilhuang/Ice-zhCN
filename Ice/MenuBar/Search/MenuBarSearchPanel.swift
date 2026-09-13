@@ -156,6 +156,7 @@ private final class MenuBarSearchHostingView: NSHostingView<AnyView> {
             rootView: MenuBarSearchContentView(closePanel: { [weak panel] in panel?.close() })
                 .environmentObject(appState.itemManager)
                 .environmentObject(appState.imageCache)
+                .iceLocalized()
                 .erasedToAnyView()
         )
     }
