@@ -422,10 +422,10 @@ final class ControlItem {
             return hotkeySettingsManager.hotkey(withAction: action)
         }
 
-        let menu = NSMenu(title: "Ice")
+        let menu = NSMenu(title: Localization.string("Ice"))
 
         let settingsItem = NSMenuItem(
-            title: "Ice Settings…",
+            title: Localization.string("Ice Settings…"),
             action: #selector(AppDelegate.openSettingsWindow),
             keyEquivalent: ","
         )
@@ -435,7 +435,7 @@ final class ControlItem {
         menu.addItem(.separator())
 
         let searchItem = NSMenuItem(
-            title: "Search Menu Bar Items",
+            title: Localization.string("Search Menu Bar Items"),
             action: #selector(showSearchPanel),
             keyEquivalent: ""
         )
@@ -462,7 +462,7 @@ final class ControlItem {
                 continue
             }
             let item = NSMenuItem(
-                title: "\(section.isHidden ? "Show" : "Hide") the \(name.displayString) Section",
+                title: sectionToggleTitle(isHidden: section.isHidden, name: name),
                 action: #selector(toggleMenuBarSection),
                 keyEquivalent: ""
             )
@@ -494,7 +494,7 @@ final class ControlItem {
         menu.addItem(.separator())
 
         let checkForUpdatesItem = NSMenuItem(
-            title: "Check for Updates…",
+            title: Localization.string("Check for Updates…"),
             action: #selector(checkForUpdates),
             keyEquivalent: ""
         )
@@ -504,7 +504,7 @@ final class ControlItem {
         menu.addItem(.separator())
 
         let quitItem = NSMenuItem(
-            title: "Quit Ice",
+            title: Localization.string("Quit Ice"),
             action: #selector(NSApp.terminate),
             keyEquivalent: "q"
         )
@@ -512,6 +512,22 @@ final class ControlItem {
         menu.addItem(quitItem)
 
         return menu
+    }
+
+    /// Localized title for showing or hiding a menu bar section.
+    private func sectionToggleTitle(isHidden: Bool, name: MenuBarSection.Name) -> String {
+        switch (isHidden, name) {
+        case (true, .hidden):
+            Localization.string("Show the Hidden Section")
+        case (false, .hidden):
+            Localization.string("Hide the Hidden Section")
+        case (true, .alwaysHidden):
+            Localization.string("Show the Always-Hidden Section")
+        case (false, .alwaysHidden):
+            Localization.string("Hide the Always-Hidden Section")
+        case (_, .visible):
+            name.sectionTitle
+        }
     }
 
     /// Toggles the menu bar section associated with the given menu item.

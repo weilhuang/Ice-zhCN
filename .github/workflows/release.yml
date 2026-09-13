@@ -1,0 +1,89 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Release tag to create or reuse (e.g. v0.11.12-zhCN.1)"
+        required: true
+        default: "v0.11.12-zhCN.1"
+      create_release:
+        description: "Publish Ice.zip as a GitHub Release on this fork"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Ice.app
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          xcodebuild -version
+          swift --version
+          sw_vers
+
+      - name: Build Release zip
+        env:
+          MACOS_CERTIFICATE_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+          MACOS_CERTIFICATE_IDENTITY: ${{ secrets.MACOS_CERTIFICATE_IDENTITY }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          chmod +x scripts/build-release.sh
+          scripts/build-release.sh
+
+      - name: Upload Ice.zip artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ice
+          path: dist/Ice.zip
+          if-no-files-found: error
+
+      - name: Resolve release tag
+        id: meta
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            TAG="${{ inputs.tag_name }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish GitHub Release
+        if: github.event_name == 'push' || inputs.create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: Ice ${{ steps.meta.outputs.tag }} (简体中文)
+          files: dist/Ice.zip
+          fail_on_unmatched_files: true
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          body: |
+            这是 [weilhuang/Ice-zhCN](https://github.com/weilhuang/Ice-zhCN) 的简体中文构建，基于上游 Ice 0.11.12。
+
+            ## 安装
+            1. 下载 `Ice.zip` 并解压
+            2. 将 `Ice.app` 拖到 `/Applications`，覆盖本机未汉化的安装即可（Bundle ID 仍为 `com.jordanbaird.Ice`）
+            3. 若 Gatekeeper 拦截：对 `Ice.app` 点按鼠标右键 → **打开**，或运行 `xattr -cr /Applications/Ice.app`
+
+            ## 语言
+            打开 **Ice 设置 → 通用 → 语言**，可在「跟随系统 / English / 简体中文」之间切换。切换后会提示重新打开 Ice。
+
+            ## 自动更新
+            此构建**不会**从上游 `jordanbaird/Ice` 自动更新，以免官方英文版覆盖汉化。请从此仓库的 Releases 下载后续版本。
+
+            ## 签名
+            默认使用 ad-hoc（仅供本机运行）签名。仓库若配置了 `MACOS_CERTIFICATE_P12`、`MACOS_CERTIFICATE_PASSWORD`、`MACOS_CERTIFICATE_IDENTITY`（以及可选的 `APPLE_TEAM_ID`），同一 workflow 会改用 Developer ID 签名。

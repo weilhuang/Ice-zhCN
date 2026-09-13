@@ -9,8 +9,9 @@ struct PermissionsWindow: Scene {
     @ObservedObject var appState: AppState
 
     var body: some Scene {
-        Window(Constants.permissionsWindowTitle, id: Constants.permissionsWindowID) {
+        Window("Permissions", id: Constants.permissionsWindowID) {
             PermissionsView()
+                .iceLocalized()
                 .readWindow { window in
                     guard let window else {
                         return

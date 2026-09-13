@@ -8,6 +8,7 @@ import SwiftUI
 
 struct GeneralSettingsPane: View {
     @EnvironmentObject var appState: AppState
+    @ObservedObject private var languageManager = LanguageManager.shared
     @State private var isImportingCustomIceIcon = false
     @State private var isPresentingError = false
     @State private var presentedError: LocalizedErrorWrapper?
@@ -25,11 +26,11 @@ struct GeneralSettingsPane: View {
     private func localizedOffsetString(for offset: CGFloat) -> LocalizedStringKey {
         switch offset {
         case -16:
-            return LocalizedStringKey("none")
+            return "none"
         case 0:
-            return LocalizedStringKey("default")
+            return "default"
         case 16:
-            return LocalizedStringKey("max")
+            return "max"
         default:
             return LocalizedStringKey(offset.formatted())
         }
@@ -38,9 +39,9 @@ struct GeneralSettingsPane: View {
     private var rehideIntervalKey: LocalizedStringKey {
         let formatted = manager.rehideInterval.formatted()
         if manager.rehideInterval == 1 {
-            return LocalizedStringKey(formatted + " second")
+            return "\(formatted) second"
         } else {
-            return LocalizedStringKey(formatted + " seconds")
+            return "\(formatted) seconds"
         }
     }
 
@@ -56,6 +57,9 @@ struct GeneralSettingsPane: View {
         IceForm {
             IceSection {
                 launchAtLogin
+            }
+            IceSection {
+                languagePicker
             }
             IceSection {
                 iceIconOptions
@@ -81,17 +85,40 @@ struct GeneralSettingsPane: View {
                 isPresentingError = false
             }
         }
+        .alert(
+            "Restart Ice to apply the new language?",
+            isPresented: languageManager.bindings.needsRelaunch
+        ) {
+            Button("Restart Now") {
+                languageManager.relaunch()
+            }
+            Button("Later", role: .cancel) {
+                languageManager.needsRelaunch = false
+            }
+        } message: {
+            Text("Ice needs to restart before every part of the interface can use the language you selected.")
+        }
     }
 
     @ViewBuilder
     private var launchAtLogin: some View {
-        LaunchAtLogin.Toggle()
+        LaunchAtLogin.Toggle("Launch at login")
+    }
+
+    @ViewBuilder
+    private var languagePicker: some View {
+        IcePicker("Language", selection: languageManager.bindings.language) {
+            ForEach(AppLanguage.allCases) { language in
+                Text(language.menuTitle).tag(language)
+            }
+        }
+        .annotation("Ice will restart so menus and panels can switch languages.")
     }
 
     @ViewBuilder
     private func menuItem(for imageSet: ControlItemImageSet) -> some View {
         Label {
-            Text(imageSet.name.rawValue)
+            Text(imageSet.name.localized)
         } icon: {
             if let nsImage = imageSet.hidden.nsImage(for: appState) {
                 switch imageSet.name {

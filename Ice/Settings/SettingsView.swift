@@ -43,6 +43,7 @@ struct SettingsView: View {
             detailView
         }
         .navigationTitle(navigationState.settingsNavigationIdentifier.localized)
+        .iceLocalized()
     }
 
     @ViewBuilder

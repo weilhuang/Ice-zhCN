@@ -3,6 +3,8 @@
 //  Ice
 //
 
+import SwiftUI
+
 /// A named set of images that are used by control items.
 ///
 /// An image set contains images for a control item in both the hidden and visible states.
@@ -16,6 +18,11 @@ struct ControlItemImageSet: Codable, Hashable, Identifiable {
         case iceCube = "Ice Cube"
         case sunglasses = "Sunglasses"
         case custom = "Custom"
+
+        /// Localized label shown in the Ice icon picker.
+        var localized: LocalizedStringKey {
+            LocalizedStringKey(rawValue)
+        }
     }
 
     let name: Name
